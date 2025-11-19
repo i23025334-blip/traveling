@@ -1,10 +1,8 @@
-﻿
-namespace Travel.Models
+﻿namespace Travel.Models
 {
-    public class LoginViewModel
-    {
-        public string? username { get; set; }
-
-        public string? password { get; set; }
-    }
+	public class LoginViewModel
+	{
+		public string Username { get; set; }
+		public string Password { get; set; }
+	}
 }
