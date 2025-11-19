@@ -1,0 +1,54 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\User\\source\\repos\\Travel\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{240380D5-59F1-9B59-FD24-0C200D1CD193}|Travel\\Travel.csproj|c:\\users\\user\\source\\repos\\travel\\travel\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{240380D5-59F1-9B59-FD24-0C200D1CD193}|Travel\\Travel.csproj|solutionrelative:travel\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{240380D5-59F1-9B59-FD24-0C200D1CD193}|Travel\\Travel.csproj|c:\\users\\user\\source\\repos\\travel\\travel\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{240380D5-59F1-9B59-FD24-0C200D1CD193}|Travel\\Travel.csproj|solutionrelative:travel\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\Travel\\Travel\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "Travel\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\Travel\\Travel\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "Travel\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABgAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-19T17:26:57.009Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\Travel\\Travel\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "Travel\\Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\Travel\\Travel\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "Travel\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-19T17:23:05.352Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
