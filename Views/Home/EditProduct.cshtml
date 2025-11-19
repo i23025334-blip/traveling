@@ -1,0 +1,46 @@
+﻿@model Travel.Models.Product;
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<div class="text-center">
+    <h1 class="display-4">Edit product</h1>
+    <p>Edit product informations.</p>
+
+<form asp-action="Update" asp-controller="Home" method="post">
+    <div class="d-flex justify-content-center">
+        <table class="table-responsive table-striped">
+            <input type="hidden" asp-for="id" />
+            <tr>
+                <td align="right">Enter product name &nbsp;</td>
+                <td><input asp-for="name" /></td>
+            </tr>
+            <tr>
+                <td align="right">Enter price &nbsp;</td>
+                <td><input asp-for="price" /></td>
+            </tr>
+            <tr>
+                <td align="right">Enter quantity &nbsp;</td>
+                <td><input asp-for="quantity" /></td>
+            </tr>
+            <tr>
+                <td align="right">Enter unit &nbsp;</td>
+                <td><input asp-for="unit" /></td>
+            </tr>
+            <tr>
+                <td align="right">Enter origin &nbsp;</td>
+                <td><input asp-for="origin" /></td>
+            </tr>
+        </table>
+    </div><br />
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+        <a asp-action="Product" class="btn btn-info btn-sm">Cancel</a>
+    </div>
+
+</form>
+
