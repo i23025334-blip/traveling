@@ -43,7 +43,7 @@ namespace Travel.Models
 		}
 
 		// ---------------- USER MANAGEMENT (PLAIN TEXT PASSWORD) ----------------
-
+		/*
 		public bool CreateUser(string username, string email, string passwd, out string errorMessage)
 		{
 			errorMessage = null;
@@ -78,6 +78,43 @@ namespace Travel.Models
 			catch (Exception ex)
 			{
 				errorMessage = "DB error: " + ex.Message;
+				return false;
+			}
+		}
+		*/
+		public bool CreateUser(string email, string passwd, out string errorMessage)
+		{
+			errorMessage = null;
+
+			// Check for empty fields
+			if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(passwd))
+			{
+				errorMessage = "Email and password are required.";
+				return false;
+			}
+
+			try
+			{
+				string insertSql = "INSERT INTO Users (Email, Passwd, IsVerified, IsAdmin) VALUES (@Email, @Passwd, 0, 0)";
+
+				using (var cmd = new SqlCommand(insertSql, connection))
+				{
+					cmd.Parameters.AddWithValue("@Email", email);
+					cmd.Parameters.AddWithValue("@Passwd", passwd); // Store in plain text (not recommended)
+
+					cmd.ExecuteNonQuery();
+				}
+
+				return true;
+			}
+			catch (SqlException ex) when (ex.Number == 2627) // Unique constraint violation
+			{
+				errorMessage = "Email already exists.";
+				return false;
+			}
+			catch (Exception ex)
+			{
+				errorMessage = "Database error: " + ex.Message;
 				return false;
 			}
 		}

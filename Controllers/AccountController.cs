@@ -1,54 +1,56 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Travel.Models;
 
-namespace Travel.Controllers
+public class AccountController : Controller
 {
-	public class AccountController : Controller
+	private readonly DB _db = new DB(); // Assuming connection setup is handled in DB
+
+	[HttpGet]
+	public IActionResult Login()
 	{
-		private DB db = new DB();  // Instance of your DB class
+		return View();
+	}
 
-		[HttpGet]
-		public IActionResult Login()
+	[HttpPost]
+	public IActionResult Login(LoginViewModel model)
+	{
+		if (ModelState.IsValid)
 		{
-			return View();
-		}
-
-		[HttpPost]
-		public IActionResult Login(LoginViewModel model)
-		{
-			if (ModelState.IsValid)
+			if (_db.Connect())
 			{
-				// Validate user credentials
-				if (db.Connect())  // Ensure the connection is successful
+				if (_db.ValidateUser(model.Email, model.Passwd))
 				{
-					if (db.ValidateUser(model.Email, model.Passwd))
-					{
-						// Successful login logic (set session, redirect, etc.)
-						return RedirectToAction("Index", "Home"); // Redirect to homepage
-					}
-					else
-					{
-						ViewBag.ErrorMessage = "Invalid email or password.";
-					}
+					// Logic for successful login, e.g., setting session variables
+					return RedirectToAction("Index", "Home");
 				}
 				else
 				{
-					ViewBag.ErrorMessage = "Database connection error.";
+					ViewBag.ErrorMessage = "Invalid email or password.";
 				}
 			}
-
-			return View(model);  // Return to login view with the Error
-		}
-
-		// Dispose method to close the database connection
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing)
+			else
 			{
-				db.Disconnect();
+				ViewBag.ErrorMessage = "Database connection error.";
 			}
-			base.Dispose(disposing);
 		}
+
+		return View(model);
 	}
 
+	// Registration action
+	[HttpPost]
+	public IActionResult Register(RegisterViewModel model)
+	{
+		if (ModelState.IsValid)
+		{
+			string errorMessage = null;
+			if (_db.CreateUser(model.Email, model.Passwd, out errorMessage))
+			{
+				return RedirectToAction("Login");
+			}
+
+			ViewBag.ErrorMessage = errorMessage;
+		}
+		return View(model); // Return to registration with error message
+	}
 }
