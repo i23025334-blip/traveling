@@ -144,3 +144,8 @@ C:\Users\User\source\repos\Travel\Travel\obj\Debug\net10.0\refint\Travel.dll
 C:\Users\User\source\repos\Travel\Travel\obj\Debug\net10.0\Travel.pdb
 C:\Users\User\source\repos\Travel\Travel\obj\Debug\net10.0\Travel.genruntimeconfig.cache
 C:\Users\User\source\repos\Travel\Travel\obj\Debug\net10.0\ref\Travel.dll
+C:\Users\User\source\repos\Travel\Travel\bin\Debug\net10.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+C:\Users\User\source\repos\Travel\Travel\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\User\source\repos\Travel\Travel\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\User\source\repos\Travel\Travel\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\User\source\repos\Travel\Travel\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.SqlServer.dll

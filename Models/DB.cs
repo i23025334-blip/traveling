@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;   // use Microsoft.Data.SqlClient
+using Microsoft.Data.SqlClient;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Travel.Models
 {
@@ -22,6 +20,7 @@ namespace Travel.Models
 		{
 			string connectionString = GetConnectionString();
 			connection = new SqlConnection(connectionString);
+
 			try
 			{
 				connection.Open();
@@ -43,50 +42,13 @@ namespace Travel.Models
 			}
 		}
 
-		// ---------- User methods ----------
-		// Simple salted password hashing using PBKDF2
-		private string HashPassword(string password)
-		{
-			byte[] salt;
-			byte[] buffer2;
-			using (var rng = RandomNumberGenerator.Create())
-			{
-				salt = new byte[16];
-				rng.GetBytes(salt);
-			}
-			using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100_000, HashAlgorithmName.SHA256))
-			{
-				buffer2 = pbkdf2.GetBytes(32);
-			}
+		// ---------------- USER MANAGEMENT (PLAIN TEXT PASSWORD) ----------------
 
-			var dst = new byte[1 + 16 + 32];
-			dst[0] = 0x00; // version
-			Buffer.BlockCopy(salt, 0, dst, 1, 16);
-			Buffer.BlockCopy(buffer2, 0, dst, 17, 32);
-			return Convert.ToBase64String(dst);
-		}
-
-		private bool VerifyHashedPassword(string hashedPassword, string password)
-		{
-			if (hashedPassword == null) return false;
-			var src = Convert.FromBase64String(hashedPassword);
-			if (src.Length != 1 + 16 + 32) return false;
-			var salt = new byte[16];
-			Buffer.BlockCopy(src, 1, salt, 0, 16);
-			var storedSubkey = new byte[32];
-			Buffer.BlockCopy(src, 17, storedSubkey, 0, 32);
-
-			using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100_000, HashAlgorithmName.SHA256))
-			{
-				var generatedSubkey = pbkdf2.GetBytes(32);
-				return CryptographicOperations.FixedTimeEquals(storedSubkey, generatedSubkey);
-			}
-		}
-
-		public bool CreateUser(string username, string email, string password, out string errorMessage)
+		public bool CreateUser(string username, string email, string passwd, out string errorMessage)
 		{
 			errorMessage = null;
-			if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+
+			if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(passwd))
 			{
 				errorMessage = "Username and password required.";
 				return false;
@@ -94,17 +56,21 @@ namespace Travel.Models
 
 			try
 			{
-				string insertSql = "INSERT INTO Users (Username, Email, PasswordHash) VALUES (@username, @email, @passwordHash)";
+				string insertSql = "INSERT INTO Users (Username, Email, Passwd, IsVerified, IsAdmin) " +
+								   "VALUES (@username, @email, @passwd, 0, 0)";
+
 				using (var cmd = new SqlCommand(insertSql, connection))
 				{
 					cmd.Parameters.AddWithValue("@username", username);
 					cmd.Parameters.AddWithValue("@email", (object)email ?? DBNull.Value);
-					cmd.Parameters.AddWithValue("@passwordHash", HashPassword(password));
+					cmd.Parameters.AddWithValue("@passwd", passwd);   // plain text
+
 					cmd.ExecuteNonQuery();
 				}
+
 				return true;
 			}
-			catch (SqlException ex) when (ex.Number == 2627) // unique constraint
+			catch (SqlException ex) when (ex.Number == 2627)
 			{
 				errorMessage = "Username already exists.";
 				return false;
@@ -116,12 +82,15 @@ namespace Travel.Models
 			}
 		}
 
-		public UserRecord GetUserByUsername(string username)
+		public UserRecord GetUserByEmail(string email)
 		{
-			string sql = "SELECT Id, Username, Email, PasswordHash FROM Users WHERE Username = @username";
+			string sql = "SELECT Id, Username, Email, Passwd, IsVerified, IsAdmin " +
+						 "FROM Users WHERE Email = @Email";  // Search by email
+
 			using (var cmd = new SqlCommand(sql, connection))
 			{
-				cmd.Parameters.AddWithValue("@username", username);
+				cmd.Parameters.AddWithValue("@Email", email);
+
 				using (var reader = cmd.ExecuteReader())
 				{
 					if (reader.Read())
@@ -131,37 +100,42 @@ namespace Travel.Models
 							Id = Convert.ToInt32(reader["Id"]),
 							Username = reader["Username"].ToString(),
 							Email = reader["Email"] == DBNull.Value ? null : reader["Email"].ToString(),
-							PasswordHash = reader["PasswordHash"].ToString()
+							Passwd = reader["Passwd"].ToString(),
+							IsVerified = Convert.ToBoolean(reader["IsVerified"]),
+							IsAdmin = Convert.ToBoolean(reader["IsAdmin"])
 						};
 					}
 				}
 			}
+
 			return null;
 		}
 
-		public bool ValidateUser(string username, string password)
+		public bool ValidateUser(string email, string password)
 		{
-			var user = GetUserByUsername(username);
-			if (user == null) return false;
-			return VerifyHashedPassword(user.PasswordHash, password);
+			var user = GetUserByEmail(email);  // Use email instead of username
+			if (user == null)
+				return false;
+
+			return user.Passwd == password;  // Plain text check (not secure)
 		}
 
-		// Add a small DTO for user
+
 		public class UserRecord
 		{
 			public int Id { get; set; }
 			public string Username { get; set; }
 			public string Email { get; set; }
-			public string PasswordHash { get; set; }
+			public string Passwd { get; set; }
+			public bool IsVerified { get; set; }
+			public bool IsAdmin { get; set; }
 		}
 
-		// Keep your product CRUD below unchanged...
-		// (copy in your existing product methods here)
+		// ---------------- PRODUCT CRUD (UNCHANGED) ----------------
+
 		public void Create(Product product)
 		{
-			string query = "INSERT INTO Product (name, price, quantity, unit, origin) " +
-						   "VALUES (@name, @price, @quantity, @unit, @origin)";
-
+			string query = "INSERT INTO Product (name, price, quantity, unit, origin) VALUES (@name, @price, @quantity, @unit, @origin)";
 			using (SqlCommand cmd = new SqlCommand(query, connection))
 			{
 				cmd.Parameters.AddWithValue("@name", product.name);
@@ -176,9 +150,7 @@ namespace Travel.Models
 
 		public void Update(Product product)
 		{
-			string query = "UPDATE Product SET name=@name, price=@price, quantity=@quantity, " +
-						   "unit=@unit, origin=@origin WHERE id=@id";
-
+			string query = "UPDATE Product SET name=@name, price=@price, quantity=@quantity, unit=@unit, origin=@origin WHERE id=@id";
 			using (SqlCommand cmd = new SqlCommand(query, connection))
 			{
 				cmd.Parameters.AddWithValue("@name", product.name);
@@ -195,7 +167,6 @@ namespace Travel.Models
 		public void Delete(int id)
 		{
 			string query = "DELETE FROM Product WHERE id=@id";
-
 			using (SqlCommand cmd = new SqlCommand(query, connection))
 			{
 				cmd.Parameters.AddWithValue("@id", id);
@@ -213,7 +184,7 @@ namespace Travel.Models
 			{
 				while (reader.Read())
 				{
-					Product p = new Product
+					list.Add(new Product
 					{
 						id = Convert.ToInt32(reader["id"]),
 						name = reader["name"].ToString(),
@@ -221,18 +192,14 @@ namespace Travel.Models
 						quantity = Convert.ToInt32(reader["quantity"]),
 						unit = reader["unit"].ToString(),
 						origin = reader["origin"].ToString()
-					};
-
-					list.Add(p);
+					});
 				}
 			}
-
 			return list;
 		}
 
 		public Product Read(int id)
 		{
-			Product product = null;
 			string query = "SELECT * FROM Product WHERE id=@id";
 
 			using (SqlCommand cmd = new SqlCommand(query, connection))
@@ -243,7 +210,7 @@ namespace Travel.Models
 				{
 					if (reader.Read())
 					{
-						product = new Product
+						return new Product
 						{
 							id = Convert.ToInt32(reader["id"]),
 							name = reader["name"].ToString(),
@@ -256,8 +223,7 @@ namespace Travel.Models
 				}
 			}
 
-			return product;
+			return null;
 		}
-
 	}
 }
